@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,9 +12,44 @@ class _HomeScreenState extends State<HomeScreen> {
   String expression = "";
   String result = "";
   String equation = "";
-  Color green = Color.fromARGB(255, 92, 183, 64);
+  Color green = const Color.fromARGB(255, 92, 183, 64);
   Color pink = const Color.fromARGB(0, 255, 0, 179);
   Color red = const Color.fromARGB(0, 255, 30, 0);
+
+  buttonCal(String buttonText) {
+    setState(() {
+      if (buttonText == "C") {
+        equation = '0';
+        result = '0';
+      } else if (buttonText == "Del") {
+        equation = equation.substring(0, equation.length - 1);
+        if (equation == '0') {
+          equation = '0';
+        }
+      } else if (buttonText == '=') {
+        expression = equation;
+        expression = expression.replaceAll('x', '*');
+        expression = expression.replaceAll('÷', '/');
+        try {
+          Parser p = Parser();
+
+          Expression exp = p.parse(expression);
+
+          ContextModel cm = ContextModel();
+
+          result = exp.evaluate(EvaluationType.REAL, cm).toString();
+        } catch (e) {
+          result = e.toString();
+        }
+      } else {
+        if (equation == '0') {
+          equation = '0';
+        }
+        equation = equation + buttonText;
+      }
+    });
+  }
+
   Widget myCutomButton(
       String buttonText, double buttonHeight, Color buttonColor) {
     return Card(
@@ -32,7 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
               buttonText,
               style: const TextStyle(fontSize: 30),
             ),
-            onPressed: () {}),
+            onPressed: () {
+              buttonCal(buttonText);
+            }),
       ),
     );
   }
@@ -53,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: Alignment.bottomRight,
             padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
             child: Text(
-              equation,
+              equation.toString(),
               style: const TextStyle(fontSize: 30, color: Colors.black),
             ),
           ),
@@ -61,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: Alignment.bottomRight,
             padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
             child: Text(
-              result,
+              result.toString(),
               style: const TextStyle(fontSize: 30, color: Colors.black),
             ),
           ),
